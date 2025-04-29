@@ -1,153 +1,181 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Villa Paradiso</title>
 
-  <!-- TailwindCSS CDN -->
+  <!-- TailwindCSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- React + ReactDOM UMD -->
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-
-  <!-- Lodash UMD -->
+  <!-- Lodash -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
 
-  <!-- Recharts UMD -->
-  <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Lucide-React UMD -->
-  <script src="https://unpkg.com/lucide-react/dist/umd/lucide-react.min.js"></script>
-
-  <!-- Babel Standalone for JSX -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Lucide Icons -->
+  <script type="module" src="https://unpkg.com/lucide-static"></script>
 </head>
-<body class="min-h-screen bg-white text-gray-800">
-  <div id="root"></div>
+<body class="min-h-screen bg-white text-gray-800 transition-colors">
+  <!-- Header -->
+  <header id="header" class="fixed top-0 w-full bg-white/90 backdrop-blur py-4 z-50">
+    <nav class="container mx-auto flex justify-between items-center px-4">
+      <span class="text-2xl font-bold">Villa Paradiso</span>
+      <div id="navLinks" class="space-x-4">
+        <button data-target="home" class="nav-btn">Home</button>
+        <button data-target="info" class="nav-btn">Informazioni</button>
+        <button data-target="gallery" class="nav-btn">Galleria 3D</button>
+        <button data-target="calendar" class="nav-btn">Prenota</button>
+        <button data-target="contact" class="nav-btn">Contatti</button>
+      </div>
+      <button id="darkToggle" class="p-2 rounded-full hover:bg-gray-200">☾</button>
+    </nav>
+  </header>
 
-  <!-- Single React Component Script -->
-  <script type="text/babel">
-    // Global bindings
-    const { useState, useEffect, useRef, lazy, Suspense } = React;
-    const { createRoot } = ReactDOM;
-    const {
-      Calendar: IconCalendar, Clock, Home, Info, Map, MessageCircle,
-      Navigation, Star, Moon, Sun, AlertCircle, Shield, Settings, X, Check
-    } = LucideReact;
-    const {
-      LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
-    } = Recharts;
-    const _ = _.noConflict();
+  <!-- Sections -->
+  <main class="pt-24">
+    <section id="home" class="h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 text-white text-center">
+      <div>
+        <h1 class="text-5xl font-bold mb-4">Villa Paradiso</h1>
+        <p class="text-xl mb-8">Un'oasi di pace immersa nella natura.</p>
+        <button data-target="gallery" class="px-6 py-3 bg-white text-blue-600 rounded mr-2">Esplora 3D</button>
+        <button data-target="calendar" class="px-6 py-3 bg-blue-600 text-white rounded">Prenota Ora</button>
+      </div>
+    </section>
 
-    // Data
-    const availabilityData = [
-      { name: 'Maggio', occupancy: 45 },
-      { name: 'Giugno', occupancy: 65 },
-      { name: 'Luglio', occupancy: 85 },
-      { name: 'Agosto', occupancy: 95 },
-      { name: 'Settembre', occupancy: 60 },
-      { name: 'Ottobre', occupancy: 40 }
-    ];
-    const cookieCategories = [
-      { id: 'necessary', name: 'Necessari', description: 'Cookie necessari per il funzionamento del sito', required: true },
-      { id: 'preferences', name: 'Preferenze', description: 'Cookie per salvare le tue preferenze e migliorare la tua esperienza' },
-      { id: 'analytics', name: 'Analitici', description: 'Cookie che ci aiutano a comprendere come utilizzi il sito' },
-      { id: 'marketing', name: 'Marketing', description: 'Cookie utilizzati per scopi pubblicitari e di marketing' }
-    ];
-
-    // Lazy-loaded 3D Calendar component
-    const LazyCalendar3D = lazy(() => new Promise(resolve => {
-      setTimeout(() => {
-        resolve({ default: () => (
-          <div className="relative w-full aspect-square rounded-xl overflow-hidden shadow-lg">
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-500/20 to-purple-600/20"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <p className="text-xl font-medium mb-3">Calendario 3D Interattivo</p>
-                <p className="text-sm">Scorri per interagire con le date disponibili</p>
-              </div>
-            </div>
+    <section id="info" class="py-24 bg-gray-50">
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="text-4xl font-bold mb-8">La Tua Vacanza da Sogno</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="p-6 bg-white rounded-lg shadow">
+            <lucide-home class="w-12 h-12 text-blue-500 mb-4"></lucide-home>
+            <h3 class="font-bold text-xl mb-2">Villa di Lusso</h3>
+            <p>4 camere, piscina privata, vista mare.</p>
           </div>
-        ) });
-      }, 1000);
-    }));
-
-    function CasaVacanze() {
-      // State e refs
-      const [activeSection, setActiveSection] = useState('home');
-      const [darkMode, setDarkMode] = useState(false);
-      const [showBooking, setShowBooking] = useState(false);
-      const [isMenuOpen, setIsMenuOpen] = useState(false);
-      const [showCookieConsent, setShowCookieConsent] = useState(true);
-      const [showCookieSettings, setShowCookieSettings] = useState(false);
-      const [showGdprInfo, setShowGdprInfo] = useState(false);
-      const [cookieConsent, setCookieConsent] = useState({ necessary: true, preferences: false, analytics: false, marketing: false });
-      const [isLoading, setIsLoading] = useState(true);
-      const [performance, setPerformance] = useState({ score: 0, loaded: false });
-      const homeRef = useRef(null);
-      const infoRef = useRef(null);
-      const galleryRef = useRef(null);
-      const calendarRef = useRef(null);
-      const contactRef = useRef(null);
-      const [bookingInfo, setBookingInfo] = useState({ checkIn: '', checkOut: '', guests: 1, name: '', email: '', privacyConsent: false });
-
-      // Effetti
-      useEffect(() => {
-        const timer = setTimeout(() => {
-          setIsLoading(false);
-          setTimeout(() => setPerformance({ score: Math.floor(Math.random() * 15) + 85, loaded: true }), 500);
-        }, 1000);
-
-        const saved = localStorage.getItem('cookieConsent');
-        if (saved) { setCookieConsent(JSON.parse(saved)); setShowCookieConsent(false); }
-
-        const handleScroll = _.throttle(() => {
-          const pos = window.scrollY;
-          if (pos < 500) setActiveSection('home');
-          else if (pos < 1200) setActiveSection('info');
-          else if (pos < 1900) setActiveSection('gallery');
-          else if (pos < 2600) setActiveSection('calendar');
-          else setActiveSection('contact');
-        }, 100);
-        window.addEventListener('scroll', handleScroll);
-        return () => { window.removeEventListener('scroll', handleScroll); clearTimeout(timer); };
-      }, []);
-
-      // Handlers
-      const toggleDarkMode = () => {
-        setDarkMode(!darkMode);
-        if (cookieConsent.preferences) localStorage.setItem('darkMode', JSON.stringify(!darkMode));
-      };
-      const toggleBooking = () => setShowBooking(!showBooking);
-      const handleCookieConsentChange = cat => cat !== 'necessary' && setCookieConsent(c => ({ ...c, [cat]: !c[cat] }));
-      const saveCookiePreferences = () => { localStorage.setItem('cookieConsent', JSON.stringify(cookieConsent)); setShowCookieSettings(false); setShowCookieConsent(false); };
-      const acceptAllCookies = () => { const all = { necessary: true, preferences: true, analytics: true, marketing: true }; setCookieConsent(all); localStorage.setItem('cookieConsent', JSON.stringify(all)); setShowCookieConsent(false); };
-      const acceptOnlyNecessary = () => { const min = { necessary: true, preferences: false, analytics: false, marketing: false }; setCookieConsent(min); localStorage.setItem('cookieConsent', JSON.stringify(min)); setShowCookieConsent(false); };
-      const handleInputChange = e => { const { name, value, type, checked } = e.target; setBookingInfo(b => ({ ...b, [name]: type==='checkbox'?checked:value })); };
-      const handleBookingSubmit = () => {
-        if (!bookingInfo.privacyConsent) return alert('È necessario accettare la Privacy Policy per continuare.');
-        alert('Prenotazione inviata! Ti reindirizzeremo a PayPal per completare il pagamento.');
-        cookieConsent.analytics && console.log('Prenotazione:', { checkIn: bookingInfo.checkIn, checkOut: bookingInfo.checkOut, guests: bookingInfo.guests });
-        setShowBooking(false);
-      };
-      const scrollToSection = section => {
-        setActiveSection(section); setIsMenuOpen(false);
-        const refs = { home: homeRef, info: infoRef, gallery: galleryRef, calendar: calendarRef, contact: contactRef };
-        refs[section]?.current?.scrollIntoView({ behavior: 'smooth' });
-      };
-
-      return (
-        <div className={`min-h-screen ${darkMode?'bg-gray-900 text-white':'bg-white text-gray-800'} transition-all duration-500`}>
-          {/* ... Tutto il JSX originale ... */}
-          {/* Per brevità omesso qui, ma nel file include tutte le sezioni Home, Info, Gallery, Calendar, Contact */}
+          <div class="p-6 bg-white rounded-lg shadow">
+            <lucide-map class="w-12 h-12 text-blue-500 mb-4"></lucide-map>
+            <h3 class="font-bold text-xl mb-2">Posizione Ideale</h3>
+            <p>10 minuti dalla spiaggia, privacy totale.</p>
+          </div>
+          <div class="p-6 bg-white rounded-lg shadow">
+            <lucide-star class="w-12 h-12 text-blue-500 mb-4"></lucide-star>
+            <h3 class="font-bold text-xl mb-2">Servizi Premium</h3>
+            <p>Wi-Fi, chef privato, barbecue.</p>
+          </div>
         </div>
-      );
-    }
+      </div>
+    </section>
 
-    // Montaggio
-    createRoot(document.getElementById('root')).render(<CasaVacanze />);
+    <section id="gallery" class="py-24 bg-white text-center">
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold mb-8">Tour Virtuale 3D</h2>
+        <div id="calendar3d" class="h-80 bg-gray-200 rounded-lg flex items-center justify-center">
+          <span>Caricamento 3D...</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="calendar" class="py-24 bg-gray-50">
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="text-4xl font-bold mb-8">Disponibilità</h2>
+        <canvas id="availabilityChart" class="mx-auto" width="600" height="300"></canvas>
+        <button id="bookBtn" class="mt-8 px-6 py-3 bg-blue-600 text-white rounded">Prenota Ora</button>
+      </div>
+    </section>
+
+    <section id="contact" class="py-24 bg-white">
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="text-4xl font-bold mb-4">Contatti</h2>
+        <p>Email: info@villaparadiso.it</p>
+        <p>Telefono: +39 012 345 6789</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Cookie Consent Banner -->
+  <div id="cookieBanner" class="fixed bottom-0 w-full bg-white p-4 shadow hidden">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+      <span>Utilizziamo cookie per migliorare l'esperienza. <button id="showCookieSettings" class="underline">Impostazioni</button></span>
+      <button id="acceptCookies" class="px-4 py-2 bg-blue-600 text-white rounded">Accetta</button>
+    </div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div id="bookingModal" class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-lg max-w-md w-full p-6 relative">
+      <button id="closeBooking" class="absolute top-4 right-4">✕</button>
+      <h3 class="text-2xl font-bold mb-4">Prenota il tuo soggiorno</h3>
+      <div class="space-y-4 text-left">
+        <input id="checkIn" type="date" class="w-full p-2 border rounded" />
+        <input id="checkOut" type="date" class="w-full p-2 border rounded" />
+        <input id="guests" type="number" min="1" value="1" class="w-full p-2 border rounded" />
+        <input id="name" type="text" placeholder="Nome" class="w-full p-2 border rounded" />
+        <input id="email" type="email" placeholder="Email" class="w-full p-2 border rounded" />
+        <label class="flex items-center space-x-2"><input id="privacyConsent" type="checkbox" /> <span>Accetto la Privacy Policy</span></label>
+        <button id="submitBooking" class="w-full py-2 bg-blue-600 text-white rounded">Invia Prenotazione</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Dark Mode Toggle
+    const darkToggle = document.getElementById('darkToggle');
+    darkToggle.addEventListener('click', () => document.body.classList.toggle('dark'));
+
+    // Smooth Scroll & Active Nav
+    const navBtns = document.querySelectorAll('.nav-btn');
+    navBtns.forEach(btn => btn.addEventListener('click', () => {
+      document.getElementById(btn.dataset.target).scrollIntoView({ behavior: 'smooth' });
+    }));
+    window.addEventListener('scroll', _.throttle(() => {
+      document.querySelectorAll('section').forEach(sec => {
+        const rect = sec.getBoundingClientRect();
+        const btn = document.querySelector(`.nav-btn[data-target="${sec.id}"]`);
+        if (rect.top <= 100 && rect.bottom > 100) {
+          btn.classList.add('text-blue-600', 'font-medium');
+        } else btn.classList.remove('text-blue-600', 'font-medium');
+      });
+    }, 100));
+
+    // 3D Calendar Lazy Load
+    setTimeout(() => {
+      document.getElementById('calendar3d').innerHTML = '<p>Component 3D caricato!</p>';
+    }, 1000);
+
+    // Chart.js Availability Chart
+    const ctx = document.getElementById('availabilityChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre'],
+        datasets: [{
+          label: 'Occupazione %',
+          data: [45,65,85,95,60,40],
+          fill: false,
+          tension: 0.4
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // Booking Modal
+    const bookBtn = document.getElementById('bookBtn');
+    const bookingModal = document.getElementById('bookingModal');
+    document.getElementById('closeBooking').onclick = () => bookingModal.classList.add('hidden');
+    bookBtn.onclick = () => bookingModal.classList.remove('hidden');
+    document.getElementById('submitBooking').onclick = () => {
+      const consent = document.getElementById('privacyConsent').checked;
+      if (!consent) return alert('Accetta la Privacy Policy');
+      alert('Prenotazione inviata!'); bookingModal.classList.add('hidden');
+    };
+
+    // Cookie Consent
+    const cookieBanner = document.getElementById('cookieBanner');
+    if (!localStorage.getItem('cookieConsent')) cookieBanner.classList.remove('hidden');
+    document.getElementById('acceptCookies').onclick = () => {
+      localStorage.setItem('cookieConsent', 'accepted'); cookieBanner.classList.add('hidden');
+    };
   </script>
 </body>
 </html>
