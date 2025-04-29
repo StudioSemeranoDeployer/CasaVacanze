@@ -1,181 +1,226 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Villa Paradiso</title>
+  <meta name="description" content="Villa Paradiso - Oasi di lusso sulla Costa Azzurra, prenota il tuo soggiorno da sogno.">
+  <meta name="keywords" content="vacanza,lusso,ville,prenotazione,CasaVacanze,Costa Azzurra">
+  <meta name="theme-color" content="#4338CA">
 
-  <!-- TailwindCSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://unpkg.com">
+
+  <!-- Google Fonts: Montserrat -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- TailwindCSS CDN with custom config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#4338CA', secondary: '#6D28D9' },
+          fontFamily: { sans: ['Montserrat', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <script defer src="https://cdn.tailwindcss.com"></script>
+
+  <!-- AOS Scroll Animations -->
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+  <script defer src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
   <!-- Lodash -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
 
   <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Lucide Icons -->
-  <script type="module" src="https://unpkg.com/lucide-static"></script>
+  <!-- Lucide Icons UMD -->
+  <script defer src="https://unpkg.com/lucide-react/dist/umd/lucide-react.min.js"></script>
+
+  <!-- Model Viewer for 3D -->
+  <script type="module" defer src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    [data-aos] { opacity: 0; transition-property: opacity, transform; }
+  </style>
 </head>
-<body class="min-h-screen bg-white text-gray-800 transition-colors">
+<body class="min-h-screen bg-white text-gray-800 font-sans dark:bg-gray-900 dark:text-gray-200">
   <!-- Header -->
-  <header id="header" class="fixed top-0 w-full bg-white/90 backdrop-blur py-4 z-50">
-    <nav class="container mx-auto flex justify-between items-center px-4">
-      <span class="text-2xl font-bold">Villa Paradiso</span>
-      <div id="navLinks" class="space-x-4">
-        <button data-target="home" class="nav-btn">Home</button>
-        <button data-target="info" class="nav-btn">Informazioni</button>
-        <button data-target="gallery" class="nav-btn">Galleria 3D</button>
-        <button data-target="calendar" class="nav-btn">Prenota</button>
-        <button data-target="contact" class="nav-btn">Contatti</button>
+  <header id="header" class="fixed top-0 w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-md z-50">
+    <nav class="container mx-auto flex justify-between items-center py-4 px-6">
+      <a href="#home" class="text-2xl font-bold text-primary">Villa Paradiso</a>
+      <div class="hidden md:flex space-x-6">
+        <a href="#home" class="nav-link">Home</a>
+        <a href="#info" class="nav-link">Informazioni</a>
+        <a href="#gallery" class="nav-link">Galleria 3D</a>
+        <a href="#calendar" class="nav-link">Disponibilità</a>
+        <a href="#contact" class="nav-link">Contatti</a>
       </div>
-      <button id="darkToggle" class="p-2 rounded-full hover:bg-gray-200">☾</button>
+      <div class="flex items-center space-x-4">
+        <button id="darkToggle" aria-label="Toggle Dark Mode" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+          <svg id="iconMode" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"></svg>
+        </button>
+        <button id="menuBtn" class="md:hidden p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition" aria-label="Apri menu">☰</button>
+      </div>
     </nav>
+    <div id="mobileMenu" class="md:hidden bg-white dark:bg-gray-800 hidden">
+      <nav class="flex flex-col space-y-2 px-6 py-4">
+        <a href="#home" class="nav-link">Home</a>
+        <a href="#info" class="nav-link">Informazioni</a>
+        <a href="#gallery" class="nav-link">Galleria 3D</a>
+        <a href="#calendar" class="nav-link">Disponibilità</a>
+        <a href="#contact" class="nav-link">Contatti</a>
+      </nav>
+    </div>
   </header>
 
-  <!-- Sections -->
-  <main class="pt-24">
-    <section id="home" class="h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 text-white text-center">
+  <!-- Main Content -->
+  <main class="pt-20">
+    <!-- Home Section -->
+    <section id="home" class="h-screen flex items-center justify-center bg-gradient-to-r from-primary to-secondary text-white text-center" data-aos="fade">
       <div>
-        <h1 class="text-5xl font-bold mb-4">Villa Paradiso</h1>
-        <p class="text-xl mb-8">Un'oasi di pace immersa nella natura.</p>
-        <button data-target="gallery" class="px-6 py-3 bg-white text-blue-600 rounded mr-2">Esplora 3D</button>
-        <button data-target="calendar" class="px-6 py-3 bg-blue-600 text-white rounded">Prenota Ora</button>
+        <h1 class="text-5xl md:text-7xl font-bold mb-4" data-aos="zoom-in">Villa Paradiso</h1>
+        <p class="text-lg md:text-2xl mb-8" data-aos="fade-up" data-aos-delay="200">Un'oasi di lusso immersa nella natura, la tua casa lontano da casa.</p>
+        <div class="space-x-4">
+          <a href="#gallery" class="px-6 py-3 bg-white text-primary font-medium rounded hover:bg-gray-100 transition" data-aos="fade-right" data-aos-delay="400">Esplora 3D</a>
+          <a href="#calendar" class="px-6 py-3 bg-primary text-white font-medium rounded hover:bg-secondary transition" data-aos="fade-left" data-aos-delay="400">Prenota Ora</a>
+        </div>
       </div>
     </section>
 
-    <section id="info" class="py-24 bg-gray-50">
-      <div class="container mx-auto px-4 text-center">
-        <h2 class="text-4xl font-bold mb-8">La Tua Vacanza da Sogno</h2>
+    <!-- Info Section -->
+    <section id="info" class="py-24 bg-gray-50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="container mx-auto px-6 text-center">
+        <h2 class="text-4xl font-bold mb-12">La Tua Vacanza da Sogno</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div class="p-6 bg-white rounded-lg shadow">
-            <lucide-home class="w-12 h-12 text-blue-500 mb-4"></lucide-home>
-            <h3 class="font-bold text-xl mb-2">Villa di Lusso</h3>
-            <p>4 camere, piscina privata, vista mare.</p>
+          <div class="p-6 bg-white dark:bg-gray-700 rounded-xl shadow-lg transform hover:scale-105 transition" data-aos="flip-left">
+            <lucide-home class="w-12 h-12 text-primary mb-4"></lucide-home>
+            <h3 class="font-semibold text-xl mb-2">Villa di Lusso</h3>
+            <p>4 camere, piscina privata, vista mare mozzafiato.</p>
           </div>
-          <div class="p-6 bg-white rounded-lg shadow">
-            <lucide-map class="w-12 h-12 text-blue-500 mb-4"></lucide-map>
-            <h3 class="font-bold text-xl mb-2">Posizione Ideale</h3>
-            <p>10 minuti dalla spiaggia, privacy totale.</p>
+          <div class="p-6 bg-white dark:bg-gray-700 rounded-xl shadow-lg transform hover:scale-105 transition" data-aos="flip-up">
+            <lucide-map class="w-12 h-12 text-primary mb-4"></lucide-map>
+            <h3 class="font-semibold text-xl mb-2">Posizione Ideale</h3>
+            <p>A 10 minuti dalla spiaggia e 15 dal centro storico.</p>
           </div>
-          <div class="p-6 bg-white rounded-lg shadow">
-            <lucide-star class="w-12 h-12 text-blue-500 mb-4"></lucide-star>
-            <h3 class="font-bold text-xl mb-2">Servizi Premium</h3>
-            <p>Wi-Fi, chef privato, barbecue.</p>
+          <div class="p-6 bg-white dark:bg-gray-700 rounded-xl shadow-lg transform hover:scale-105 transition" data-aos="flip-right">
+            <lucide-star class="w-12 h-12 text-primary mb-4"></lucide-star>
+            <h3 class="font-semibold text-xl mb-2">Servizi Premium</h3>
+            <p>Wi-Fi ad alta velocità, chef privato, barbecue.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="gallery" class="py-24 bg-white text-center">
-      <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold mb-8">Tour Virtuale 3D</h2>
-        <div id="calendar3d" class="h-80 bg-gray-200 rounded-lg flex items-center justify-center">
-          <span>Caricamento 3D...</span>
-        </div>
+    <!-- Gallery 3D Section -->
+    <section id="gallery" class="py-24 bg-white dark:bg-gray-900 text-center" data-aos="fade">
+      <div class="container mx-auto px-6">
+        <h2 class="text-4xl font-bold mb-12">Tour Virtuale Immersivo</h2>
+        <model-viewer src="path/to/villa.glb" alt="Tour 3D Villa Paradiso" camera-controls auto-rotate ar reveal="auto" style="width: 100%; height: 500px;" loading="lazy"></model-viewer>
       </div>
     </section>
 
-    <section id="calendar" class="py-24 bg-gray-50">
-      <div class="container mx-auto px-4 text-center">
-        <h2 class="text-4xl font-bold mb-8">Disponibilità</h2>
-        <canvas id="availabilityChart" class="mx-auto" width="600" height="300"></canvas>
-        <button id="bookBtn" class="mt-8 px-6 py-3 bg-blue-600 text-white rounded">Prenota Ora</button>
+    <!-- Availability Section -->
+    <section id="calendar" class="py-24 bg-gray-50 dark:bg-gray-800" data-aos="fade-up">
+      <div class="container mx-auto px-6 text-center">
+        <h2 class="text-4xl font-bold mb-8">Disponibilità Mensile</h2>
+        <canvas id="availabilityChart" class="mx-auto max-w-3xl" width="800" height="400" aria-label="Grafico disponibilità mensile" role="img"></canvas>
       </div>
     </section>
 
-    <section id="contact" class="py-24 bg-white">
-      <div class="container mx-auto px-4 text-center">
+    <!-- Contact Section -->
+    <section id="contact" class="py-24 bg-white dark:bg-gray-900 text-center" data-aos="fade">
+      <div class="container mx-auto px-6">
         <h2 class="text-4xl font-bold mb-4">Contatti</h2>
-        <p>Email: info@villaparadiso.it</p>
-        <p>Telefono: +39 012 345 6789</p>
+        <p class="mb-2">Email: <a href="mailto:info@villaparadiso.it" class="text-primary underline">info@villaparadiso.it</a></p>
+        <p>Telefono: <a href="tel:+390123456789" class="text-primary underline">+39 012 345 6789</a></p>
       </div>
     </section>
   </main>
 
   <!-- Cookie Consent Banner -->
-  <div id="cookieBanner" class="fixed bottom-0 w-full bg-white p-4 shadow hidden">
-    <div class="container mx-auto px-4 flex justify-between items-center">
-      <span>Utilizziamo cookie per migliorare l'esperienza. <button id="showCookieSettings" class="underline">Impostazioni</button></span>
-      <button id="acceptCookies" class="px-4 py-2 bg-blue-600 text-white rounded">Accetta</button>
+  <div id="cookieBanner" class="fixed bottom-4 right-4 bg-white dark:bg-gray-800 shadow-lg p-4 rounded hidden" role="dialog" aria-live="polite">
+    <p class="mb-2">Questo sito utilizza cookie per migliorare la tua esperienza. <button id="showCookieSettings" class="underline">Impostazioni</button></p>
+    <div class="flex space-x-2 justify-end">
+      <button id="acceptCookies" class="px-4 py-2 bg-primary text-white rounded">Accetta</button>
+      <button id="rejectCookies" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded">Rifiuta</button>
     </div>
   </div>
 
   <!-- Booking Modal -->
-  <div id="bookingModal" class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-lg max-w-md w-full p-6 relative">
-      <button id="closeBooking" class="absolute top-4 right-4">✕</button>
+  <div id="bookingModal" class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true">
+    <div class="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md p-6 relative" data-aos="zoom-in">
+      <button id="closeBooking" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200" aria-label="Chiudi">✕</button>
       <h3 class="text-2xl font-bold mb-4">Prenota il tuo soggiorno</h3>
-      <div class="space-y-4 text-left">
-        <input id="checkIn" type="date" class="w-full p-2 border rounded" />
-        <input id="checkOut" type="date" class="w-full p-2 border rounded" />
-        <input id="guests" type="number" min="1" value="1" class="w-full p-2 border rounded" />
-        <input id="name" type="text" placeholder="Nome" class="w-full p-2 border rounded" />
-        <input id="email" type="email" placeholder="Email" class="w-full p-2 border rounded" />
-        <label class="flex items-center space-x-2"><input id="privacyConsent" type="checkbox" /> <span>Accetto la Privacy Policy</span></label>
-        <button id="submitBooking" class="w-full py-2 bg-blue-600 text-white rounded">Invia Prenotazione</button>
+      <div class="space-y-4">
+        <label>Check-in<input id="checkIn" type="date" class="w-full p-2 border rounded" /></label>
+        <label>Check-out<input id="checkOut" type="date" class="w-full p-2 border rounded" /></label>
+        <label>Ospiti<input id="guests" type="number" min="1" value="1" class="w-full p-2 border rounded" /></label>
+        <label>Nome<input id="name" type="text" placeholder="Nome" class="w-full p-2 border rounded" /></label>
+        <label>Email<input id="email" type="email" placeholder="Email" class="w-full p-2 border rounded" /></label>
+        <label class="flex items-center"><input id="privacyConsent" type="checkbox" class="mr-2" />Accetto la Privacy Policy</label>
+        <button id="submitBooking" class="w-full py-2 bg-primary text-white rounded">Invia Prenotazione</button>
       </div>
     </div>
   </div>
 
   <script>
-    // Dark Mode Toggle
-    const darkToggle = document.getElementById('darkToggle');
-    darkToggle.addEventListener('click', () => document.body.classList.toggle('dark'));
+    document.addEventListener('DOMContentLoaded', () => {
+      // Dark mode: system + saved preference
+      const root = document.documentElement;
+      const saved = localStorage.getItem('theme');
+      const prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.classList.toggle('dark', saved === 'dark' || (!saved && prefers));
+      const icon = document.getElementById('iconMode');
+      const setIcon = () => {
+        if (root.classList.contains('dark')) icon.innerHTML = LucideReact.Sun();
+        else icon.innerHTML = LucideReact.Moon();
+      };
+      setIcon();
+      document.getElementById('darkToggle').onclick = () => {
+        root.classList.toggle('dark');
+        localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
+        setIcon();
+      };
 
-    // Smooth Scroll & Active Nav
-    const navBtns = document.querySelectorAll('.nav-btn');
-    navBtns.forEach(btn => btn.addEventListener('click', () => {
-      document.getElementById(btn.dataset.target).scrollIntoView({ behavior: 'smooth' });
-    }));
-    window.addEventListener('scroll', _.throttle(() => {
-      document.querySelectorAll('section').forEach(sec => {
-        const rect = sec.getBoundingClientRect();
-        const btn = document.querySelector(`.nav-btn[data-target="${sec.id}"]`);
-        if (rect.top <= 100 && rect.bottom > 100) {
-          btn.classList.add('text-blue-600', 'font-medium');
-        } else btn.classList.remove('text-blue-600', 'font-medium');
+      // Mobile menu
+      const menuBtn = document.getElementById('menuBtn'), mobileMenu = document.getElementById('mobileMenu');
+      menuBtn.onclick = () => mobileMenu.classList.toggle('hidden');
+
+      // Initialize AOS
+      if (window.AOS) AOS.init({ once: true, duration: 800 });
+
+      // Availability Chart
+      const ctx = document.getElementById('availabilityChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line', data: {
+          labels: ['Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre'],
+          datasets: [{ label:'Occupazione %', data:[45,65,85,95,60,40], tension:0.4, borderColor: 'var(--tw-prose-hr)', fill:false }]
+        }, options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, max:100 }} }
       });
-    }, 100));
 
-    // 3D Calendar Lazy Load
-    setTimeout(() => {
-      document.getElementById('calendar3d').innerHTML = '<p>Component 3D caricato!</p>';
-    }, 1000);
+      // Cookie Banner
+      const banner = document.getElementById('cookieBanner');
+      if (!localStorage.getItem('cookieConsent')) banner.classList.remove('hidden');
+      document.getElementById('acceptCookies').onclick = () => { localStorage.setItem('cookieConsent','accepted'); banner.classList.add('hidden'); };
+      document.getElementById('rejectCookies').onclick = () => { localStorage.setItem('cookieConsent','rejected'); banner.classList.add('hidden'); };
 
-    // Chart.js Availability Chart
-    const ctx = document.getElementById('availabilityChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre'],
-        datasets: [{
-          label: 'Occupazione %',
-          data: [45,65,85,95,60,40],
-          fill: false,
-          tension: 0.4
-        }]
-      },
-      options: { responsive: true, maintainAspectRatio: false }
+      // Booking Modal
+      const bookBtn = document.querySelector('a[href="#calendar"]');
+      const modal = document.getElementById('bookingModal');
+      document.getElementById('closeBooking').onclick = () => modal.classList.add('hidden');
+      document.getElementById('submitBooking').onclick = () => {
+        if (!document.getElementById('privacyConsent').checked) return alert('Accetta la Privacy Policy');
+        alert('Prenotazione inviata!'); modal.classList.add('hidden');
+      };
+      document.getElementById('calendar').querySelector('button')?.addEventListener('click', () => modal.classList.remove('hidden'));
     });
-
-    // Booking Modal
-    const bookBtn = document.getElementById('bookBtn');
-    const bookingModal = document.getElementById('bookingModal');
-    document.getElementById('closeBooking').onclick = () => bookingModal.classList.add('hidden');
-    bookBtn.onclick = () => bookingModal.classList.remove('hidden');
-    document.getElementById('submitBooking').onclick = () => {
-      const consent = document.getElementById('privacyConsent').checked;
-      if (!consent) return alert('Accetta la Privacy Policy');
-      alert('Prenotazione inviata!'); bookingModal.classList.add('hidden');
-    };
-
-    // Cookie Consent
-    const cookieBanner = document.getElementById('cookieBanner');
-    if (!localStorage.getItem('cookieConsent')) cookieBanner.classList.remove('hidden');
-    document.getElementById('acceptCookies').onclick = () => {
-      localStorage.setItem('cookieConsent', 'accepted'); cookieBanner.classList.add('hidden');
-    };
   </script>
 </body>
 </html>
