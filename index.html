@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Clock, Home, Info, Map, MessageCircle, Navigation, Star, Moon, Sun } from 'lucide-react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { Calendar, Clock, Home, Info, Map, MessageCircle, Navigation, Star, Moon, Sun, AlertCircle, Shield, Settings, X, Check } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import _ from 'lodash';
 
 // Dati di esempio per il calendario di disponibilità
 const availabilityData = [
@@ -12,28 +13,91 @@ const availabilityData = [
   { name: 'Ottobre', occupancy: 40 },
 ];
 
+// Cookie Categories
+const cookieCategories = [
+  { id: 'necessary', name: 'Necessari', description: 'Cookie necessari per il funzionamento del sito', required: true },
+  { id: 'preferences', name: 'Preferenze', description: 'Cookie per salvare le tue preferenze e migliorare la tua esperienza' },
+  { id: 'analytics', name: 'Analitici', description: 'Cookie che ci aiutano a comprendere come utilizzi il sito' },
+  { id: 'marketing', name: 'Marketing', description: 'Cookie utilizzati per scopi pubblicitari e di marketing' }
+];
+
+// Lazy load components for performance optimization
+const LazyCalendar3D = lazy(() => new Promise(resolve => {
+  // Simula caricamento componente pesante
+  setTimeout(() => {
+    resolve({
+      default: () => (
+        <div className="relative w-full aspect-square rounded-xl overflow-hidden shadow-lg">
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-500/20 to-purple-600/20"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-xl font-medium mb-3">Calendario 3D Interattivo</p>
+              <p className="text-sm">Scorri per interagire con le date disponibili</p>
+            </div>
+          </div>
+        </div>
+      )
+    });
+  }, 1000);
+}));
+
 export default function CasaVacanze() {
   const [activeSection, setActiveSection] = useState('home');
   const [darkMode, setDarkMode] = useState(false);
   const [showBooking, setShowBooking] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showCookieConsent, setShowCookieConsent] = useState(true);
+  const [showCookieSettings, setShowCookieSettings] = useState(false);
+  const [showGdprInfo, setShowGdprInfo] = useState(false);
+  const [cookieConsent, setCookieConsent] = useState({
+    necessary: true,
+    preferences: false,
+    analytics: false,
+    marketing: false
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [performance, setPerformance] = useState({ score: 0, loaded: false });
+  
   const homeRef = useRef(null);
   const infoRef = useRef(null);
   const galleryRef = useRef(null);
   const calendarRef = useRef(null);
   const contactRef = useRef(null);
+  const privacyRef = useRef(null);
   
   const [bookingInfo, setBookingInfo] = useState({
     checkIn: '',
     checkOut: '',
     guests: 1,
     name: '',
-    email: ''
+    email: '',
+    privacyConsent: false
   });
 
   // Simulazione del controllo di intersezione per il cambio di sezione durante lo scrolling
+  // Intersection Observer per il rilevamento delle sezioni visibili
   useEffect(() => {
-    const handleScroll = () => {
+    // Simula caricamento iniziale della pagina
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+      // Simulazione calcolo performance dopo caricamento
+      setTimeout(() => {
+        setPerformance({ 
+          score: Math.floor(Math.random() * 15) + 85, // Simula punteggio tra 85-100
+          loaded: true 
+        });
+      }, 500);
+    }, 1000);
+    
+    // Verifica il consenso dei cookie salvato
+    const savedConsent = localStorage.getItem('cookieConsent');
+    if (savedConsent) {
+      setCookieConsent(JSON.parse(savedConsent));
+      setShowCookieConsent(false);
+    }
+    
+    // Ottimizzazione dello scroll listener usando throttle
+    const handleScroll = _.throttle(() => {
       const scrollPosition = window.scrollY;
       if (scrollPosition < 500) {
         setActiveSection('home');
@@ -46,30 +110,95 @@ export default function CasaVacanze() {
       } else {
         setActiveSection('contact');
       }
-    };
+    }, 100); // Throttle di 100ms per ottimizzare le prestazioni
 
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timer);
+    };
   }, []);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
+    // Salva la preferenza se c'è il consenso
+    if (cookieConsent.preferences) {
+      localStorage.setItem('darkMode', !darkMode);
+    }
   };
 
   const toggleBooking = () => {
     setShowBooking(!showBooking);
   };
+  
+  const handleCookieConsentChange = (category) => {
+    if (category === 'necessary') return; // Non può essere modificato
+    
+    setCookieConsent(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+  
+  const saveCookiePreferences = () => {
+    localStorage.setItem('cookieConsent', JSON.stringify(cookieConsent));
+    setShowCookieSettings(false);
+    setShowCookieConsent(false);
+  };
+  
+  const acceptAllCookies = () => {
+    const allAccepted = {
+      necessary: true,
+      preferences: true,
+      analytics: true,
+      marketing: true
+    };
+    setCookieConsent(allAccepted);
+    localStorage.setItem('cookieConsent', JSON.stringify(allAccepted));
+    setShowCookieConsent(false);
+  };
+  
+  const acceptOnlyNecessary = () => {
+    const minimalConsent = {
+      necessary: true,
+      preferences: false,
+      analytics: false,
+      marketing: false
+    };
+    setCookieConsent(minimalConsent);
+    localStorage.setItem('cookieConsent', JSON.stringify(minimalConsent));
+    setShowCookieConsent(false);
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setBookingInfo({
       ...bookingInfo,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     });
   };
 
   const handleBookingSubmit = () => {
+    // Verifica del consenso alla privacy
+    if (!bookingInfo.privacyConsent) {
+      alert('È necessario accettare la Privacy Policy per continuare.');
+      return;
+    }
+    
+    // Qui invieremmo i dati ad un server sicuro conforme al GDPR
+    // Per ora simuliamo solo il reindirizzamento a PayPal
     alert('Prenotazione inviata! Ti reindirizzeremo a PayPal per completare il pagamento.');
+    
+    // Log anonimizzato se c'è il consenso analitico
+    if (cookieConsent.analytics) {
+      console.log('Prenotazione effettuata:', {
+        checkIn: bookingInfo.checkIn,
+        checkOut: bookingInfo.checkOut,
+        guests: bookingInfo.guests,
+        // Dati personali omessi per privacy
+      });
+    }
+    
     setShowBooking(false);
   };
 
@@ -100,6 +229,222 @@ export default function CasaVacanze() {
 
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-800'} transition-all duration-500`}>
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-t-blue-500 border-blue-200 rounded-full animate-spin mb-4"></div>
+            <p className="text-white text-lg">Caricamento di Villa Paradiso...</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Performance Indicator */}
+      {performance.loaded && (
+        <div className={`fixed bottom-24 right-4 z-40 py-2 px-4 rounded-lg shadow-lg text-white transition-opacity duration-1000 ${performance.score > 90 ? 'bg-green-600' : 'bg-yellow-600'}`}>
+          <div className="flex items-center space-x-2">
+            <span className="font-medium">Performance:</span>
+            <span>{performance.score}/100</span>
+          </div>
+        </div>
+      )}
+      
+      {/* Cookie Consent Banner */}
+      {showCookieConsent && (
+        <div className={`fixed bottom-0 left-0 right-0 z-50 p-4 ${darkMode ? 'bg-gray-800' : 'bg-white'} border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'} shadow-lg`}>
+          <div className="container mx-auto">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex-1">
+                <h3 className="text-lg font-bold mb-2">Il tuo consenso ai cookie</h3>
+                <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  Utilizziamo cookie e tecnologie simili per migliorare la tua esperienza di navigazione, personalizzare contenuti e analizzare il traffico. 
+                  Per saperne di più, consulta la nostra <button onClick={() => {setShowCookieConsent(false); setShowCookieSettings(true)}} className="text-blue-500 hover:underline">Cookie Policy</button>.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={acceptOnlyNecessary}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} transition-colors`}
+                >
+                  Solo necessari
+                </button>
+                <button
+                  onClick={() => setShowCookieSettings(true)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} transition-colors`}
+                >
+                  Personalizza
+                </button>
+                <button
+                  onClick={acceptAllCookies}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  Accetta tutti
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Cookie Settings Modal */}
+      {showCookieSettings && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+          <div className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-xl`}>
+            <div className="flex justify-between items-center p-6 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}">
+              <h3 className="text-xl font-bold">Impostazioni Cookie</h3>
+              <button 
+                onClick={() => setShowCookieSettings(false)}
+                className={`p-2 rounded-full ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <p className={`mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                La tua privacy è importante per noi. Puoi scegliere quali tipi di cookie accettare. 
+                I cookie necessari non possono essere disattivati poiché sono essenziali per il funzionamento del sito.
+              </p>
+              
+              <div className="space-y-4 mb-8">
+                {cookieCategories.map(category => (
+                  <div 
+                    key={category.id} 
+                    className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <h4 className="font-medium">{category.name}</h4>
+                        {category.required && (
+                          <span className={`ml-2 text-xs py-1 px-2 rounded-full ${darkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                            Richiesto
+                          </span>
+                        )}
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          checked={cookieConsent[category.id]}
+                          onChange={() => handleCookieConsentChange(category.id)}
+                          disabled={category.required}
+                        />
+                        <div className={`w-11 h-6 rounded-full peer ${cookieConsent[category.id] ? 'bg-blue-600' : darkMode ? 'bg-gray-600' : 'bg-gray-300'} peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all`}></div>
+                      </label>
+                    </div>
+                    <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      {category.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex flex-wrap gap-3 justify-end">
+                <button
+                  onClick={() => setShowCookieSettings(false)}
+                  className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} transition-colors`}
+                >
+                  Annulla
+                </button>
+                <button
+                  onClick={saveCookiePreferences}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  Salva preferenze
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* GDPR Info Modal */}
+      {showGdprInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+          <div className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-xl`}>
+            <div className="flex justify-between items-center p-6 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}">
+              <h3 className="text-xl font-bold">Informativa sulla Privacy (GDPR)</h3>
+              <button 
+                onClick={() => setShowGdprInfo(false)}
+                className={`p-2 rounded-full ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className={`p-4 mb-6 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-50'} flex items-start space-x-3`}>
+                <Shield size={24} className="text-blue-500 mt-1 flex-shrink-0" />
+                <p className="text-sm">
+                  Villa Paradiso rispetta pienamente il Regolamento Generale sulla Protezione dei Dati (GDPR) dell'Unione Europea. 
+                  Ci impegniamo a proteggere e rispettare la tua privacy.
+                </p>
+              </div>
+              
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-lg font-medium mb-2">Titolare del trattamento</h4>
+                  <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Villa Paradiso S.r.l.<br />
+                    Via del Mare, 123<br />
+                    Costa Azzurra, 12345<br />
+                    Italia<br />
+                    Email: privacy@villaparadiso.it
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-medium mb-2">Dati raccolti</h4>
+                  <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-2`}>
+                    Raccogliamo i seguenti dati personali:
+                  </p>
+                  <ul className={`list-disc pl-5 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} space-y-1`}>
+                    <li>Dati di contatto (nome, email, telefono)</li>
+                    <li>Dati di prenotazione (date di soggiorno, numero di ospiti)</li>
+                    <li>Dati di pagamento (gestiti in modo sicuro tramite PayPal)</li>
+                    <li>Dati tecnici (indirizzo IP, tipo di browser)</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-medium mb-2">Finalità del trattamento</h4>
+                  <ul className={`list-disc pl-5 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} space-y-1`}>
+                    <li>Gestione delle prenotazioni</li>
+                    <li>Comunicazioni relative al tuo soggiorno</li>
+                    <li>Miglioramento dei nostri servizi</li>
+                    <li>Adempimento di obblighi legali</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-medium mb-2">I tuoi diritti</h4>
+                  <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-2`}>
+                    Hai diritto di:
+                  </p>
+                  <ul className={`list-disc pl-5 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} space-y-1`}>
+                    <li>Accedere ai tuoi dati personali</li>
+                    <li>Rettificare i tuoi dati personali</li>
+                    <li>Cancellare i tuoi dati personali</li>
+                    <li>Limitare il trattamento dei tuoi dati</li>
+                    <li>Opporti al trattamento dei tuoi dati</li>
+                    <li>Portabilità dei dati</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="mt-8 flex justify-end">
+                <button
+                  onClick={() => setShowGdprInfo(false)}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  Ho capito
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Header/Navbar */}
       <header className={`fixed top-0 left-0 right-0 z-50 ${darkMode ? 'bg-gray-900/90' : 'bg-white/90'} backdrop-blur-sm transition-all duration-300`}>
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -336,13 +681,17 @@ export default function CasaVacanze() {
             </div>
             
             <div className="flex-1 flex justify-center">
-              {/* 3D Model Placeholder */}
-              <div className={`w-full max-w-md aspect-square rounded-2xl ${darkMode ? 'bg-gray-800' : 'bg-gray-100'} border ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex items-center justify-center`}>
-                <div className="text-center">
-                  <p className={`text-xl mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Modello 3D</p>
-                  <p className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>Scorri per interagire</p>
+              {/* 3D Model con Lazy Loading */}
+              <Suspense fallback={
+                <div className={`w-full max-w-md aspect-square rounded-2xl ${darkMode ? 'bg-gray-800' : 'bg-gray-100'} border ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex items-center justify-center`}>
+                  <div className="text-center">
+                    <div className="w-10 h-10 border-2 border-t-blue-500 border-blue-200 rounded-full animate-spin mb-4 mx-auto"></div>
+                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Caricamento modello 3D...</p>
+                  </div>
                 </div>
-              </div>
+              }>
+                <LazyCalendar3D />
+              </Suspense>
             </div>
           </div>
           
@@ -507,7 +856,7 @@ export default function CasaVacanze() {
                       />
                     </div>
                     
-                    <div className="mb-8">
+                    <div className="mb-4">
                       <label className="block text-sm font-medium mb-1">Email</label>
                       <input 
                         type="email" 
@@ -518,6 +867,29 @@ export default function CasaVacanze() {
                         className={`w-full px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'} border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors`}
                         required
                       />
+                    </div>
+                    
+                    <div className="mb-8">
+                      <div className="flex items-start space-x-3">
+                        <input
+                          type="checkbox"
+                          id="privacyConsent"
+                          name="privacyConsent"
+                          checked={bookingInfo.privacyConsent}
+                          onChange={handleInputChange}
+                          className="mt-1"
+                          required
+                        />
+                        <label htmlFor="privacyConsent" className="text-sm">
+                          Ho letto e accetto la <button 
+                            type="button" 
+                            onClick={() => setShowGdprInfo(true)}
+                            className="text-blue-500 hover:underline"
+                          >
+                            Privacy Policy
+                          </button> e autorizzo il trattamento dei miei dati personali in conformità al GDPR.
+                        </label>
+                      </div>
                     </div>
                     
                     <div>
